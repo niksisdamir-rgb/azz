@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Calendar, Users, Download, RefreshCw, Printer, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, Users, Download, RefreshCw, Printer, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Link } from 'wouter';
 
 /**
  * Professional Enterprise Design - Payroll Timesheet Generator
@@ -306,6 +307,14 @@ const PayrollTimesheetGenerator = () => {
         <div className="relative container py-8 text-white">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Poppins' }}>Payroll Timesheet Generator</h1>
           <p className="text-slate-200 mt-2">Manage worker shifts and calculate monthly hours</p>
+          <div className="mt-4">
+            <Link href="/socket">
+              <Button variant="secondary" size="sm" className="bg-amber-500 hover:bg-amber-600 text-white border-none">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Open Socket Demo
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
