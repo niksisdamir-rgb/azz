@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Calendar, Users, Download, RefreshCw, Printer, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
+import { Calendar, Users, Download, RefreshCw, Printer, ChevronDown, ChevronUp, MessageSquare, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Link } from 'wouter';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 /**
  * Professional Enterprise Design - Payroll Timesheet Generator
@@ -292,6 +293,16 @@ const PayrollTimesheetGenerator = () => {
     }));
   };
 
+  const chartData = useMemo(() => {
+    if (!pivotData) return [];
+    return pivotData.workers.map(worker => ({
+      name: worker.name.split(' ')[0], // Use first name for chart
+      fullName: worker.name,
+      hours: pivotData.data[worker.name].total,
+      overtime: pivotData.data[worker.name].totalOvertime
+    })).sort((a, b) => b.hours - a.hours);
+  }, [pivotData]);
+
   const getShiftColor = (code: string) => {
     if (code === '12') return 'bg-blue-50 text-blue-700 border-blue-200';
     if (code === '10') return 'bg-green-50 text-green-700 border-green-200';
@@ -382,8 +393,53 @@ const PayrollTimesheetGenerator = () => {
           </Card>
         ) : pivotData && (pivotData as any).data ? (
           <div className="space-y-4">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Summary Stats & Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card className="border-slate-200 shadow-sm h-full">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-amber-500" />
+                        Hours Distribution by Worker
+                      </h3>
+                    </div>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis 
+                            dataKey="name" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: '#64748b', fontSize: 12 }}
+                          />
+                          <YAxis 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: '#64748b', fontSize: 12 }}
+                          />
+                          <Tooltip 
+                            cursor={{ fill: '#f8fafc' }}
+                            contentStyle={{ 
+                              borderRadius: '8px', 
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                            }}
+                          />
+                          <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
+                            {chartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={index < 3 ? '#1e3a5f' : '#3b82f6'} />
+                            ))}
+                          </Bar>
+                          <Bar dataKey="overtime" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+              <div className="space-y-4">
               <Card className="border-slate-200 shadow-sm">
                 <div className="p-4">
                   <p className="text-slate-600 text-sm font-medium">Total Workers</p>
@@ -404,6 +460,7 @@ const PayrollTimesheetGenerator = () => {
                   </p>
                 </div>
               </Card>
+              </div>
             </div>
 
             {/* Teams Section */}
