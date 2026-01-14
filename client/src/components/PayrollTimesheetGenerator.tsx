@@ -318,11 +318,17 @@ const PayrollTimesheetGenerator = () => {
         <div className="relative container py-8 text-white">
           <h1 className="text-4xl font-bold" style={{ fontFamily: 'Poppins' }}>Payroll Timesheet Generator</h1>
           <p className="text-slate-200 mt-2">Manage worker shifts and calculate monthly hours</p>
-          <div className="mt-4">
+          <div className="mt-4 flex gap-3">
             <Link href="/socket">
               <Button variant="secondary" size="sm" className="bg-amber-500 hover:bg-amber-600 text-white border-none">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Open Socket Demo
+              </Button>
+            </Link>
+            <Link href="/viz">
+              <Button variant="secondary" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white border-none">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Data Visualization Demo
               </Button>
             </Link>
           </div>
