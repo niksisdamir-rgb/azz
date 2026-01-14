@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Calendar, Users, Download, RefreshCw, Printer, ChevronDown, ChevronUp, MessageSquare, BarChart3 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Calendar, Users, Download, RefreshCw, Printer, ChevronDown, ChevronUp, MessageSquare, BarChart3, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Link } from 'wouter';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { usePayrollStore } from '@/hooks/usePayrollStore';
 
 /**
  * Professional Enterprise Design - Payroll Timesheet Generator
@@ -18,14 +19,19 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
  */
 
 const PayrollTimesheetGenerator = () => {
-  const currentYear = 2026;
-  const currentMonth = 1;
+  const { 
+    selectedYear, 
+    selectedMonth, 
+    shiftData, 
+    overtimeData, 
+    dataGenerated,
+    setYear,
+    setMonth,
+    setShiftData,
+    setOvertimeData,
+    setDataGenerated
+  } = usePayrollStore();
 
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const [shiftData, setShiftData] = useState<any[]>([]);
-  const [overtimeData, setOvertimeData] = useState<Record<string, number>>({});
-  const [dataGenerated, setDataGenerated] = useState(false);
   const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({ team1: true, team2: true, team3: true, regular: true });
 
   // Real workers organized by teams
@@ -198,10 +204,10 @@ const PayrollTimesheetGenerator = () => {
 
   const handleOvertimeChange = (workerName: string, day: number, value: string) => {
     const key = `${workerName}-${day}`;
-    setOvertimeData(prev => ({
-      ...prev,
+    setOvertimeData({
+      ...overtimeData,
       [key]: value === '' ? 0 : parseFloat(value) || 0
-    }));
+    });
   };
 
   const getOvertime = (workerName: string, day: number) => {
@@ -307,7 +313,7 @@ const PayrollTimesheetGenerator = () => {
     if (code === '12') return 'bg-blue-50 text-blue-700 border-blue-200';
     if (code === '10') return 'bg-green-50 text-green-700 border-green-200';
     if (code === 'S') return 'bg-gray-50 text-gray-600 border-gray-200';
-    return 'bg-gray-50 text-gray-600 border-gray-200';
+    return 'bg-slate-50 text-slate-400 border-slate-100';
   };
 
   return (
@@ -331,6 +337,12 @@ const PayrollTimesheetGenerator = () => {
                 Data Visualization Demo
               </Button>
             </Link>
+            <Link href="/analytics">
+              <Button variant="secondary" size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white border-none">
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Integrated Analytics
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -342,7 +354,7 @@ const PayrollTimesheetGenerator = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Year</label>
-                <Select value={selectedYear.toString()} onValueChange={(val) => setSelectedYear(parseInt(val))}>
+                <Select value={selectedYear.toString()} onValueChange={(val) => setYear(parseInt(val))}>
                   <SelectTrigger className="border-slate-300">
                     <SelectValue />
                   </SelectTrigger>
@@ -356,7 +368,7 @@ const PayrollTimesheetGenerator = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Month</label>
-                <Select value={selectedMonth.toString()} onValueChange={(val) => setSelectedMonth(parseInt(val))}>
+                <Select value={selectedMonth.toString()} onValueChange={(val) => setMonth(parseInt(val))}>
                   <SelectTrigger className="border-slate-300">
                     <SelectValue />
                   </SelectTrigger>
@@ -526,9 +538,15 @@ const PayrollTimesheetGenerator = () => {
                                             S
                                           </div>
                                         )}
-                                        {dayData.overtime > 0 && (
-                                          <div className="text-xs text-amber-600 font-semibold">+{dayData.overtime}h</div>
-                                        )}
+                                        <div className="mt-1">
+                                          <Input
+                                            type="number"
+                                            className="h-6 w-12 text-[10px] p-1 text-center border-slate-200 focus:border-amber-400"
+                                            placeholder="OT"
+                                            value={dayData.overtime || ''}
+                                            onChange={(e) => handleOvertimeChange(worker.name, day + 1, e.target.value)}
+                                          />
+                                        </div>
                                       </div>
                                     </td>
                                   );
